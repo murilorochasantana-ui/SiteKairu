@@ -40,7 +40,6 @@
             <select name="section" required>
               <option value="hero_background">Fundo principal da hero</option>
               <option value="hero">Carrossel da hero</option>
-              <option value="portfolio">Portfólio</option>
             </select>
           </label>
           <label>
@@ -83,9 +82,23 @@
       <section class="image-section" aria-labelledby="portfolioTitle">
         <div class="section-heading">
           <p class="admin-eyebrow">Portfólio</p>
-          <h2 id="portfolioTitle">Galeria de projetos</h2>
+          <h2 id="portfolioTitle">Projetos</h2>
         </div>
-        <div id="portfolioList" class="image-grid"></div>
+        <p class="portfolio-help">
+          Cada projeto vira uma foto de capa no site. Ao clicar nela, o visitante
+          vê todas as fotos daquele projeto em uma galeria.
+        </p>
+
+        <form id="newProjectForm" class="new-project-form">
+          <label>
+            Nome do projeto
+            <input name="title" type="text" placeholder="Ex.: Casa com piscina e vista" required />
+          </label>
+          <button type="submit">Criar projeto</button>
+        </form>
+        <p id="newProjectMessage" class="form-message" role="status"></p>
+
+        <div id="projectsList" class="projects-list"></div>
       </section>
     </main>
 
