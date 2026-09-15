@@ -380,11 +380,18 @@ app.get("/api/images", async (_req, res) => {
   });
 });
 
+function sanitizeSingleLine(value, maxLength) {
+  return String(value || "")
+    .replace(/[\r\n\t]+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
 app.post("/api/contact", contactLimiter, async (req, res) => {
-  const nome = String(req.body.nome || "").trim();
-  const email = String(req.body.email || "").trim();
-  const telefone = String(req.body.telefone || "").trim();
-  const mensagem = String(req.body.mensagem || "").trim();
+  const nome = sanitizeSingleLine(req.body.nome, 150);
+  const email = sanitizeSingleLine(req.body.email, 254);
+  const telefone = sanitizeSingleLine(req.body.telefone, 40);
+  const mensagem = String(req.body.mensagem || "").trim().slice(0, 5000);
 
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
