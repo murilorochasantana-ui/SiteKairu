@@ -6,12 +6,14 @@ const path = require("path");
 
 const express = require("express");
 const session = require("express-session");
+const rateLimit = require("express-rate-limit");
 const multer = require("multer");
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 const nodemailer = require("nodemailer");
 
 const app = express();
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = Number(process.env.PORT || 3000);
 const ROOT_DIR = __dirname;
 const DB_DIR = path.join(ROOT_DIR, "db");
@@ -21,6 +23,18 @@ const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "kairu-admin";
 const SESSION_SECRET =
   process.env.SESSION_SECRET || "troque-este-segredo-em-producao";
+
+if (IS_PRODUCTION) {
+  const usingDefaultPassword = !process.env.ADMIN_PASSWORD;
+  const usingDefaultSecret = !process.env.SESSION_SECRET;
+
+  if (usingDefaultPassword || usingDefaultSecret) {
+    console.error(
+      "Configuração insegura: defina ADMIN_PASSWORD e SESSION_SECRET (variáveis de ambiente) antes de rodar em produção. O servidor não vai iniciar com os valores padrão do exemplo."
+    );
+    process.exit(1);
+  }
+}
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
@@ -237,6 +251,10 @@ const upload = multer({
   },
 });
 
+if (IS_PRODUCTION) {
+  app.set("trust proxy", 1);
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -248,10 +266,27 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
+      secure: IS_PRODUCTION,
       maxAge: 1000 * 60 * 60 * 8,
     },
   })
 );
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de login. Tente novamente em alguns minutos." },
+});
+
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas mensagens enviadas. Tente novamente mais tarde." },
+});
 
 app.get("/api/images", async (_req, res) => {
   const rows = await db.all(
@@ -267,7 +302,7 @@ app.get("/api/images", async (_req, res) => {
   });
 });
 
-app.post("/api/contact", async (req, res) => {
+app.post("/api/contact", contactLimiter, async (req, res) => {
   const nome = String(req.body.nome || "").trim();
   const email = String(req.body.email || "").trim();
   const telefone = String(req.body.telefone || "").trim();
@@ -307,7 +342,7 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-app.post("/api/admin/login", async (req, res) => {
+app.post("/api/admin/login", loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   const user = await db.get("SELECT * FROM users WHERE username = ?", username);
 
