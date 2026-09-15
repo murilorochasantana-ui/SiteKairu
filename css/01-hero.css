@@ -1,6 +1,6 @@
 /* ===== Kairu — Página 1: Hero ===== */
 
-.hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;
+.hero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;overflow:hidden;
   background:linear-gradient(100deg, rgba(28,38,50,.94) 0%, rgba(28,38,50,.9) 34%, rgba(28,38,50,.25) 100%), var(--hero-bg, url(../imagens/hero-fundo.jpg)) center 38%/cover no-repeat;
   color:var(--cal);}
 .hero::after{

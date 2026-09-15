@@ -6,12 +6,14 @@ const path = require("path");
 
 const express = require("express");
 const session = require("express-session");
+const rateLimit = require("express-rate-limit");
 const multer = require("multer");
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 const nodemailer = require("nodemailer");
 
 const app = express();
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const PORT = Number(process.env.PORT || 3000);
 const ROOT_DIR = __dirname;
 const DB_DIR = path.join(ROOT_DIR, "db");
@@ -21,6 +23,18 @@ const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "kairu-admin";
 const SESSION_SECRET =
   process.env.SESSION_SECRET || "troque-este-segredo-em-producao";
+
+if (IS_PRODUCTION) {
+  const usingDefaultPassword = !process.env.ADMIN_PASSWORD;
+  const usingDefaultSecret = !process.env.SESSION_SECRET;
+
+  if (usingDefaultPassword || usingDefaultSecret) {
+    console.error(
+      "Configuração insegura: defina ADMIN_PASSWORD e SESSION_SECRET (variáveis de ambiente) antes de rodar em produção. O servidor não vai iniciar com os valores padrão do exemplo."
+    );
+    process.exit(1);
+  }
+}
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
@@ -118,9 +132,17 @@ async function migrate() {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS images (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       section TEXT NOT NULL CHECK(section IN ('hero_background', 'hero', 'portfolio')),
+      project_id INTEGER REFERENCES projects(id),
       url TEXT NOT NULL,
       alt TEXT NOT NULL DEFAULT '',
       sort_order INTEGER NOT NULL DEFAULT 0,
@@ -128,7 +150,7 @@ async function migrate() {
     );
   `);
 
-  const table = await db.get(
+  let table = await db.get(
     "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'images'"
   );
 
@@ -138,6 +160,7 @@ async function migrate() {
       CREATE TABLE images_new (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         section TEXT NOT NULL CHECK(section IN ('hero_background', 'hero', 'portfolio')),
+        project_id INTEGER REFERENCES projects(id),
         url TEXT NOT NULL,
         alt TEXT NOT NULL DEFAULT '',
         sort_order INTEGER NOT NULL DEFAULT 0,
@@ -149,6 +172,30 @@ async function migrate() {
       ALTER TABLE images_new RENAME TO images;
       PRAGMA foreign_keys = ON;
     `);
+
+    table = await db.get(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'images'"
+    );
+  }
+
+  if (!table.sql.includes("project_id")) {
+    await db.exec("ALTER TABLE images ADD COLUMN project_id INTEGER REFERENCES projects(id);");
+  }
+
+  const orphanPhotos = await db.all(
+    "SELECT id, alt FROM images WHERE section = 'portfolio' AND project_id IS NULL ORDER BY sort_order, id"
+  );
+
+  const lastProjectOrder = await db.get("SELECT COALESCE(MAX(sort_order), 0) AS last FROM projects");
+  let nextProjectOrder = lastProjectOrder.last + 1;
+
+  for (const photo of orphanPhotos) {
+    const project = await db.run(
+      "INSERT INTO projects (title, sort_order) VALUES (?, ?)",
+      photo.alt || "Projeto sem título",
+      nextProjectOrder++
+    );
+    await db.run("UPDATE images SET project_id = ? WHERE id = ?", project.lastID, photo.id);
   }
 }
 
@@ -188,11 +235,6 @@ async function seedImages() {
     ["hero", "/imagens/hero-colagem-1-patio-piscina.jpg", "Área externa com piscina", 1],
     ["hero", "/imagens/hero-colagem-2-entrada.jpg", "Entrada de casa contemporânea", 2],
     ["hero", "/imagens/hero-colagem-3-fachada.jpg", "Fachada residencial", 3],
-    ["portfolio", "/imagens/portfolio-1-casa-piscina-vista.jpg", "Casa com piscina e vista", 1],
-    ["portfolio", "/imagens/portfolio-2-casa-madeira.jpg", "Casa com madeira aparente", 2],
-    ["portfolio", "/imagens/portfolio-3-casa-entardecer.jpg", "Casa ao entardecer", 3],
-    ["portfolio", "/imagens/portfolio-4-area-piscina.jpg", "Área de lazer com piscina", 4],
-    ["portfolio", "/imagens/portfolio-5-fachada-concreto.jpg", "Fachada em concreto", 5],
   ];
 
   const statement = await db.prepare(
@@ -205,6 +247,29 @@ async function seedImages() {
     }
   } finally {
     await statement.finalize();
+  }
+
+  const portfolioProjects = [
+    { title: "Casa com piscina e vista", url: "/imagens/portfolio-1-casa-piscina-vista.jpg" },
+    { title: "Casa com madeira aparente", url: "/imagens/portfolio-2-casa-madeira.jpg" },
+    { title: "Casa ao entardecer", url: "/imagens/portfolio-3-casa-entardecer.jpg" },
+    { title: "Área de lazer com piscina", url: "/imagens/portfolio-4-area-piscina.jpg" },
+    { title: "Fachada em concreto", url: "/imagens/portfolio-5-fachada-concreto.jpg" },
+  ];
+
+  for (const [index, project] of portfolioProjects.entries()) {
+    const created = await db.run(
+      "INSERT INTO projects (title, sort_order) VALUES (?, ?)",
+      project.title,
+      index + 1
+    );
+
+    await db.run(
+      "INSERT INTO images (section, project_id, url, alt, sort_order) VALUES ('portfolio', ?, ?, ?, 1)",
+      created.lastID,
+      project.url,
+      project.title
+    );
   }
 }
 
@@ -237,6 +302,10 @@ const upload = multer({
   },
 });
 
+if (IS_PRODUCTION) {
+  app.set("trust proxy", 1);
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -248,26 +317,70 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
+      secure: IS_PRODUCTION,
       maxAge: 1000 * 60 * 60 * 8,
     },
   })
 );
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de login. Tente novamente em alguns minutos." },
+});
+
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas mensagens enviadas. Tente novamente mais tarde." },
+});
+
 app.get("/api/images", async (_req, res) => {
   const rows = await db.all(
-    "SELECT id, section, url, alt, sort_order FROM images ORDER BY section, sort_order, id"
+    "SELECT id, section, url, alt, sort_order FROM images WHERE section != 'portfolio' ORDER BY section, sort_order, id"
   );
+
+  const portfolioRows = await db.all(`
+    SELECT images.url, images.alt, images.project_id, projects.title AS project_title
+    FROM images
+    LEFT JOIN projects ON projects.id = images.project_id
+    WHERE images.section = 'portfolio'
+    ORDER BY projects.sort_order, images.project_id, images.sort_order, images.id
+  `);
+
+  const projectsById = new Map();
+  const portfolio = [];
+
+  for (const row of portfolioRows) {
+    let project = projectsById.get(row.project_id);
+
+    if (!project) {
+      project = { id: row.project_id, title: row.project_title, photos: [] };
+      projectsById.set(row.project_id, project);
+      portfolio.push(project);
+    }
+
+    project.photos.push({ url: row.url, alt: row.alt });
+  }
+
+  portfolio.forEach((project) => {
+    project.cover = project.photos[0];
+  });
 
   res.set("Cache-Control", "no-store");
   res.json({
     heroBackground:
       rows.find((image) => image.section === "hero_background") || null,
     hero: rows.filter((image) => image.section === "hero"),
-    portfolio: rows.filter((image) => image.section === "portfolio"),
+    portfolio,
   });
 });
 
-app.post("/api/contact", async (req, res) => {
+app.post("/api/contact", contactLimiter, async (req, res) => {
   const nome = String(req.body.nome || "").trim();
   const email = String(req.body.email || "").trim();
   const telefone = String(req.body.telefone || "").trim();
@@ -307,7 +420,7 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-app.post("/api/admin/login", async (req, res) => {
+app.post("/api/admin/login", loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   const user = await db.get("SELECT * FROM users WHERE username = ?", username);
 
@@ -334,22 +447,110 @@ app.get("/api/admin/me", requireAuth, (req, res) => {
 
 app.get("/api/admin/images", requireAuth, async (_req, res) => {
   const rows = await db.all(
-    "SELECT id, section, url, alt, sort_order, created_at FROM images ORDER BY section, sort_order, id"
+    "SELECT id, section, project_id, url, alt, sort_order, created_at FROM images ORDER BY section, project_id, sort_order, id"
   );
   res.json(rows);
+});
+
+app.get("/api/admin/projects", requireAuth, async (_req, res) => {
+  const rows = await db.all(
+    "SELECT id, title, sort_order, created_at FROM projects ORDER BY sort_order, id"
+  );
+  res.json(rows);
+});
+
+app.post("/api/admin/projects", requireAuth, async (req, res) => {
+  const title = String(req.body.title || "").trim();
+  if (!title) {
+    res.status(400).json({ error: "Informe um nome para o projeto." });
+    return;
+  }
+
+  const lastOrder = await db.get("SELECT COALESCE(MAX(sort_order), 0) AS last FROM projects");
+  const result = await db.run(
+    "INSERT INTO projects (title, sort_order) VALUES (?, ?)",
+    title,
+    lastOrder.last + 1
+  );
+
+  const project = await db.get("SELECT * FROM projects WHERE id = ?", result.lastID);
+  res.status(201).json(project);
+});
+
+app.put("/api/admin/projects/:id", requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  const title = String(req.body.title || "").trim();
+
+  if (!id || !title) {
+    res.status(400).json({ error: "Dados inválidos." });
+    return;
+  }
+
+  const result = await db.run("UPDATE projects SET title = ? WHERE id = ?", title, id);
+
+  if (result.changes === 0) {
+    res.status(404).json({ error: "Projeto não encontrado." });
+    return;
+  }
+
+  const project = await db.get("SELECT * FROM projects WHERE id = ?", id);
+  res.json(project);
+});
+
+app.delete("/api/admin/projects/:id", requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  const project = await db.get("SELECT * FROM projects WHERE id = ?", id);
+
+  if (!project) {
+    res.status(404).json({ error: "Projeto não encontrado." });
+    return;
+  }
+
+  const photos = await db.all("SELECT url FROM images WHERE project_id = ?", id);
+  await db.run("DELETE FROM images WHERE project_id = ?", id);
+  await db.run("DELETE FROM projects WHERE id = ?", id);
+
+  for (const photo of photos) {
+    if (isUploadedFile(photo.url)) {
+      fs.rm(uploadedFilePath(photo.url), { force: true }, () => {});
+    }
+  }
+
+  res.json({ ok: true });
 });
 
 app.post("/api/admin/images", requireAuth, upload.single("image"), async (req, res) => {
   const section = normalizeSection(req.body.section);
   if (!section || !req.file) {
+    if (req.file) fs.rm(req.file.path, { force: true }, () => {});
     res.status(400).json({ error: "Informe a seção e selecione uma imagem." });
     return;
   }
 
-  const lastOrder = await db.get(
-    "SELECT COALESCE(MAX(sort_order), 0) AS last FROM images WHERE section = ?",
-    section
-  );
+  let projectId = null;
+
+  if (section === "portfolio") {
+    projectId = Number(req.body.project_id);
+    const project = projectId && (await db.get("SELECT id FROM projects WHERE id = ?", projectId));
+
+    if (!project) {
+      fs.rm(req.file.path, { force: true }, () => {});
+      res.status(400).json({ error: "Selecione um projeto do portfólio para esta foto." });
+      return;
+    }
+  }
+
+  const lastOrder =
+    section === "portfolio"
+      ? await db.get(
+          "SELECT COALESCE(MAX(sort_order), 0) AS last FROM images WHERE section = 'portfolio' AND project_id = ?",
+          projectId
+        )
+      : await db.get(
+          "SELECT COALESCE(MAX(sort_order), 0) AS last FROM images WHERE section = ?",
+          section
+        );
+
   const url = `/uploads/${req.file.filename}`;
   const alt = String(req.body.alt || "").trim();
   const sortOrder =
@@ -362,8 +563,9 @@ app.post("/api/admin/images", requireAuth, upload.single("image"), async (req, r
   }
 
   const result = await db.run(
-    "INSERT INTO images (section, url, alt, sort_order) VALUES (?, ?, ?, ?)",
+    "INSERT INTO images (section, project_id, url, alt, sort_order) VALUES (?, ?, ?, ?, ?)",
     section,
+    projectId,
     url,
     alt,
     Number.isFinite(sortOrder) ? sortOrder : lastOrder.last + 1
@@ -384,9 +586,22 @@ app.put("/api/admin/images/:id", requireAuth, async (req, res) => {
     return;
   }
 
+  let projectId = null;
+
+  if (section === "portfolio") {
+    projectId = Number(req.body.project_id);
+    const project = projectId && (await db.get("SELECT id FROM projects WHERE id = ?", projectId));
+
+    if (!project) {
+      res.status(400).json({ error: "Selecione um projeto do portfólio para esta foto." });
+      return;
+    }
+  }
+
   const result = await db.run(
-    "UPDATE images SET section = ?, alt = ?, sort_order = ? WHERE id = ?",
+    "UPDATE images SET section = ?, project_id = ?, alt = ?, sort_order = ? WHERE id = ?",
     section,
+    projectId,
     alt,
     section === "hero_background" ? 1 : sortOrder,
     id
