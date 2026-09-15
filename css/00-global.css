@@ -33,10 +33,10 @@ nav a{font-size:20px;font-weight:500;text-transform:uppercase;letter-spacing:.06
 
 /* Menu mobile (usado em todas as páginas) */
 @media (max-width:820px){
-  nav.primary-nav{position:fixed;inset:0;background:var(--noite);flex-direction:column;justify-content:center;align-items:flex-start;padding:32px;gap:26px;transform:translateX(100%);transition:transform .35s ease;}
+  nav.primary-nav{position:fixed;inset:0;z-index:1;background:var(--noite);flex-direction:column;justify-content:center;align-items:flex-start;padding:32px;gap:10px;transform:translateX(100%);transition:transform .35s ease;}
   nav.primary-nav.open{transform:translateX(0);}
-  nav.primary-nav a{font-size:1.1rem;}
-  .nav-toggle{display:block;background:none;border:none;color:var(--cal);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;}
+  nav.primary-nav a{display:inline-block;padding:10px 0;font-size:1.1rem;}
+  .nav-toggle{position:relative;z-index:2;display:block;background:none;border:none;color:var(--cal);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;padding:14px 12px;margin:-14px -12px;}
 }
 
 /* Utilitários de seção usados por todas as páginas */
