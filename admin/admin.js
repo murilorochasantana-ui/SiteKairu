@@ -1,5 +1,7 @@
-const uploadForm = document.querySelector("#uploadForm");
-const uploadMessage = document.querySelector("#uploadMessage");
+const heroBackgroundUploadForm = document.querySelector("#heroBackgroundUploadForm");
+const heroBackgroundUploadMessage = document.querySelector("#heroBackgroundUploadMessage");
+const heroUploadForm = document.querySelector("#heroUploadForm");
+const heroUploadMessage = document.querySelector("#heroUploadMessage");
 const heroBackgroundList = document.querySelector("#heroBackgroundList");
 const heroList = document.querySelector("#heroList");
 const newProjectForm = document.querySelector("#newProjectForm");
@@ -424,25 +426,33 @@ async function loadAll() {
   render();
 }
 
-uploadForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  uploadMessage.textContent = "Enviando imagem...";
+function bindStaticUploadForm(form, message, section) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    message.textContent = "Enviando imagem...";
 
-  const response = await request("/api/admin/images", {
-    method: "POST",
-    body: new FormData(uploadForm),
+    const formData = new FormData(form);
+    formData.set("section", section);
+
+    const response = await request("/api/admin/images", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response || !response.ok) {
+      const result = response ? await response.json().catch(() => ({})) : {};
+      message.textContent = result.error || "Não foi possível enviar.";
+      return;
+    }
+
+    form.reset();
+    message.textContent = "Imagem enviada com sucesso.";
+    await loadAll();
   });
+}
 
-  if (!response || !response.ok) {
-    const result = response ? await response.json().catch(() => ({})) : {};
-    uploadMessage.textContent = result.error || "Não foi possível enviar.";
-    return;
-  }
-
-  uploadForm.reset();
-  uploadMessage.textContent = "Imagem enviada com sucesso.";
-  await loadAll();
-});
+bindStaticUploadForm(heroBackgroundUploadForm, heroBackgroundUploadMessage, "hero_background");
+bindStaticUploadForm(heroUploadForm, heroUploadMessage, "hero");
 
 newProjectForm.addEventListener("submit", async (event) => {
   event.preventDefault();

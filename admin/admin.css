@@ -359,10 +359,11 @@
 
 .add-photo-form {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   align-items: end;
   gap: 14px;
   padding-top: 8px;
+  margin-bottom: 22px;
   border-top: 1px dashed rgba(247, 243, 242, 0.16);
 }
 

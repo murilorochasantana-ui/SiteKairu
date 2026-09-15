@@ -28,46 +28,25 @@
         </p>
       </section>
 
-      <section class="upload-panel" aria-labelledby="uploadTitle">
-        <div>
-          <p class="admin-eyebrow">Nova imagem</p>
-          <h2 id="uploadTitle">Subir arquivo</h2>
-        </div>
-
-        <form id="uploadForm" class="upload-form">
-          <label>
-            Onde aparece
-            <select name="section" required>
-              <option value="hero_background">Fundo principal da hero</option>
-              <option value="hero">Carrossel da hero</option>
-            </select>
-          </label>
-          <label>
-            Texto alternativo
-            <input
-              name="alt"
-              type="text"
-              placeholder="Ex.: Fachada residencial ao entardecer"
-            />
-          </label>
-          <label>
-            Ordem
-            <input name="sort_order" type="number" min="1" placeholder="Automática" />
-          </label>
-          <label class="file-field">
-            Imagem
-            <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
-          </label>
-          <button type="submit">Enviar imagem</button>
-        </form>
-        <p id="uploadMessage" class="form-message" role="status"></p>
-      </section>
-
       <section class="image-section" aria-labelledby="heroBackgroundTitle">
         <div class="section-heading">
           <p class="admin-eyebrow">Hero</p>
           <h2 id="heroBackgroundTitle">Fundo principal</h2>
         </div>
+
+        <form id="heroBackgroundUploadForm" class="add-photo-form">
+          <label class="file-field">
+            Nova imagem de fundo
+            <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
+          </label>
+          <label>
+            Texto alternativo
+            <input name="alt" type="text" placeholder="Ex.: Ambiente interno residencial" />
+          </label>
+          <button type="submit">Trocar fundo</button>
+          <p id="heroBackgroundUploadMessage" class="form-message" role="status"></p>
+        </form>
+
         <div id="heroBackgroundList" class="image-grid image-grid-featured"></div>
       </section>
 
@@ -76,6 +55,24 @@
           <p class="admin-eyebrow">Hero</p>
           <h2 id="heroTitle">Carrossel inicial</h2>
         </div>
+
+        <form id="heroUploadForm" class="add-photo-form">
+          <label class="file-field">
+            Nova foto do carrossel
+            <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
+          </label>
+          <label>
+            Texto alternativo
+            <input name="alt" type="text" placeholder="Ex.: Fachada residencial ao entardecer" />
+          </label>
+          <label>
+            Ordem
+            <input name="sort_order" type="number" min="1" placeholder="Automática" />
+          </label>
+          <button type="submit">Adicionar foto</button>
+          <p id="heroUploadMessage" class="form-message" role="status"></p>
+        </form>
+
         <div id="heroList" class="image-grid"></div>
       </section>
 
