@@ -1,0 +1,61 @@
+/* ===== Kairu — Página 4: Como trabalhamos ===== */
+
+.servicos-grid{
+  display:grid;grid-template-columns:1fr 1.3fr;
+  gap:80px;margin-top:56px;
+  align-items:start;
+}
+.servicos-grid .eyebrow{
+  font-size:15px;
+  font-weight:500;
+}
+.servicos-grid h2
+{font-size:64px;
+  font-weight:600;
+  text-transform:uppercase;
+  line-height:1.05;
+  letter-spacing:-0.01em;
+}
+.servicos-grid > div:first-child > p{
+  font-size:24px;font-weight:400;
+  line-height:1.6;
+  color:var(--cal);
+  opacity:.85;max-width:44ch;
+  margin-top:20px;
+}
+.etapas{
+  display:flex;
+  flex-direction:column;
+  gap:34px;
+}
+.etapa .eyebrow{
+  color:var(--sol);
+  margin-bottom:8px;
+  font-size:23px;
+  font-weight:600;
+  letter-spacing:.02em;
+}
+.etapa h3{
+  font-size:1.15rem;
+  margin-bottom:8px;
+}
+.etapa p{
+  font-size:24px;
+  font-weight:400;
+  color:var(--cal);
+  opacity:.78;
+  max-width:52ch;
+  line-height:1.5;
+}
+
+@media (max-width:600px){
+  .servicos-grid h2{font-size:clamp(2.1rem,10vw,2.8rem);}
+  .servicos-grid > div:first-child > p{font-size:17px;}
+  .etapa p{font-size:17px;}
+  .etapa .eyebrow{font-size:19px;}
+}
+
+@media (max-width:900px){
+  .servicos-grid{grid-template-columns:1fr;gap:44px;}
+  .servicos-grid > *{min-width:0;}
+}

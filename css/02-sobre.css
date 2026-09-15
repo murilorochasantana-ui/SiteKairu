@@ -1,0 +1,15 @@
+/* ===== Kairu — Página 2: Casa do sol ===== */
+
+.conceito-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.conceito-grid h2{font-size:clamp(2rem,4vw,2.9rem);margin:18px 0 26px;color:var(--sol);}
+.conceito-grid p{max-width:52ch;color:var(--cal);opacity:.85;font-size:1rem;}
+.words{display:flex;flex-direction:column;gap:52px;}
+.word-row{display:flex;align-items:flex-start;gap:20px;}
+.word-row .ic img{width:44px;height:44px;flex-shrink:0;}
+.word-row .txt strong{display:block;font-weight:600;font-size:1.05rem;margin-bottom:4px;}
+.word-row .txt span{font-size:.9rem;color:var(--cal);opacity:.75;}
+
+@media (max-width:900px){
+  .conceito-grid{grid-template-columns:1fr;gap:44px;}
+  .conceito-grid > *{min-width:0;}
+}

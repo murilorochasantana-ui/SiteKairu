@@ -1,0 +1,20 @@
+/* ===== Kairu — Página 3: Nossos projetos ===== */
+
+.portfolio-head{margin-bottom:50px;}
+.portfolio-head h2{font-size:clamp(2rem,4vw,2.7rem);}
+.pf-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:21px;
+  max-width:1233px;
+  margin:0 auto;
+}
+.pf-item{border-radius:14px;overflow:hidden;position:relative;aspect-ratio:1/1;}
+.pf-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease;}
+.pf-item:hover img{transform:scale(1.05);}
+@media (max-width:900px){
+  .pf-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:560px){
+  .pf-grid{grid-template-columns:1fr;}
+}

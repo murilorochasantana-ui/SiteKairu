@@ -1,0 +1,99 @@
+/* ===== Kairu — Página 5: Contato ===== */
+
+.contato-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+}
+.contato-info h2{
+  font-size:36px;
+  font-weight:700;
+  max-width:16ch;
+  margin-bottom:22px;
+  line-height:1.2;
+}
+.contato-info p{font-size:24px;
+  font-weight:400;
+  line-height:1.5;
+  max-width:44ch;
+  opacity:.92;
+  margin-bottom:34px;
+}
+.contato-meta{display:flex;
+  gap:22px;
+  align-items:center;
+  flex-wrap:wrap;
+  font-size:16px;
+}
+.contato-meta span
+{display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.contato-card
+{background:var(--noite);
+  color:var(--cal);
+  border-radius:18px;
+  padding:42px;
+  box-shadow:0 40px 70px rgba(0,0,0,.25);
+}
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:20px;
+}
+.field label{
+  font-size:16px;
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--sol);
+}
+.field input,.field textarea{
+  background:transparent;
+  border:none;
+  border-bottom:1px solid rgba(247,243,242,.3);
+  color:var(--cal);
+  font-family:inherit;
+  font-size:16px;
+  font-weight:400;
+  padding:8px 2px;
+}
+.field input::placeholder,.field textarea::placeholder{
+  color:rgba(247,243,242,.45);
+}
+.field input:focus,.field textarea:focus{
+  outline:none;
+  border-bottom-color:var(--sol);
+}
+form .btn{
+  margin-top:8px;
+  border:1px solid var(--cal);
+  color:var(--cal);
+  cursor:pointer;
+  background:none;
+  font-size:16px;
+  font-weight:400;
+  border-radius:6px;
+}
+form .btn:hover{background:var(--cal);color:var(--noite);}
+form .btn:disabled{opacity:.6;cursor:not-allowed;}
+
+.contato-status{
+  margin-top:14px;
+  font-size:14px;
+  min-height:1.2em;
+}
+.contato-status-ok{color:#8fd19e;}
+.contato-status-erro{color:#e2867a;}
+
+@media (max-width:600px){
+  .contato-info h2{font-size:28px;}
+  .contato-info p{font-size:17px;}
+}
+
+@media (max-width:900px){
+  .contato-grid{grid-template-columns:1fr;gap:44px;}
+  .contato-grid > *{min-width:0;}
+}

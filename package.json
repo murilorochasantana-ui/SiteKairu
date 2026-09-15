@@ -1,0 +1,22 @@
+{
+  "name": "kairu-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site estático da Kairu (HTML/CSS/JS) + painel admin.",
+  "scripts": {
+    "start": "node server.js",
+    "static": "http-server . -p 9200 -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "multer": "^2.3.0",
+    "nodemailer": "^10.0.9",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  }
+}

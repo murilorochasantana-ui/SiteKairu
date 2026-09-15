@@ -1,0 +1,320 @@
+.admin-body {
+  min-height: 100vh;
+  background: var(--noite);
+  color: var(--cal);
+}
+
+.login-page {
+  background:
+    linear-gradient(90deg, rgba(28, 38, 50, 0.94), rgba(28, 38, 50, 0.68)),
+    url("/imagens/hero-fundo.jpg") center/cover;
+}
+
+.login-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+.login-panel,
+.upload-panel,
+.image-section {
+  border: 1px solid rgba(247, 243, 242, 0.14);
+  background: rgba(247, 243, 242, 0.06);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+}
+
+.login-panel {
+  width: min(100%, 480px);
+  padding: 42px;
+}
+
+.login-logo {
+  display: block;
+  width: 168px;
+  margin-bottom: 48px;
+}
+
+.admin-eyebrow {
+  margin: 0 0 12px;
+  color: var(--sol);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.login-panel h1,
+.admin-intro h1,
+.upload-panel h2,
+.image-section h2 {
+  margin: 0;
+  color: var(--cal);
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.login-panel h1 {
+  max-width: 380px;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+}
+
+.login-copy,
+.admin-intro p {
+  max-width: 720px;
+  color: rgba(247, 243, 242, 0.72);
+  font-size: 1.05rem;
+}
+
+.admin-form,
+.upload-form,
+.image-card form {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-form {
+  margin-top: 32px;
+}
+
+.admin-form label,
+.upload-form label,
+.image-card label {
+  display: grid;
+  gap: 8px;
+  color: rgba(247, 243, 242, 0.72);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-form input,
+.upload-form input,
+.upload-form select,
+.image-card input,
+.image-card select {
+  width: 100%;
+  border: 1px solid rgba(247, 243, 242, 0.18);
+  border-radius: 6px;
+  background: rgba(28, 38, 50, 0.62);
+  color: var(--cal);
+  font: inherit;
+  letter-spacing: 0;
+  outline: none;
+  padding: 13px 14px;
+}
+
+.admin-form input:focus,
+.upload-form input:focus,
+.upload-form select:focus,
+.image-card input:focus,
+.image-card select:focus {
+  border-color: var(--sol);
+}
+
+.admin-form button,
+.upload-form button,
+.image-card button,
+.admin-header button {
+  border: 0;
+  border-radius: 6px;
+  background: var(--sol);
+  color: var(--noite);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 13px 16px;
+  text-transform: uppercase;
+}
+
+.form-message {
+  min-height: 24px;
+  margin: 0;
+  color: var(--sol);
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(247, 243, 242, 0.12);
+  background: rgba(28, 38, 50, 0.94);
+  padding: 22px 32px;
+  backdrop-filter: blur(18px);
+}
+
+.admin-header img {
+  display: block;
+  width: 145px;
+}
+
+.admin-header nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.admin-header a {
+  color: var(--cal);
+  font-size: 0.86rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.admin-header button {
+  background: var(--argila);
+  color: var(--cal);
+  padding: 10px 14px;
+}
+
+.admin-main {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 64px 32px 96px;
+}
+
+.admin-intro {
+  margin-bottom: 38px;
+}
+
+.admin-intro h1 {
+  max-width: 760px;
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+}
+
+.upload-panel,
+.image-section {
+  margin-top: 28px;
+  padding: 28px;
+}
+
+.upload-panel {
+  display: grid;
+  grid-template-columns: 0.48fr 1fr;
+  gap: 30px;
+}
+
+.upload-panel h2,
+.image-section h2 {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.upload-form {
+  grid-template-columns: 1fr 1.3fr 0.6fr;
+  align-items: end;
+}
+
+.file-field,
+.upload-form button {
+  grid-column: span 2;
+}
+
+.image-section {
+  background: rgba(163, 81, 57, 0.24);
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.image-grid-featured {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.image-grid-featured .image-card img {
+  aspect-ratio: 16 / 7;
+}
+
+.image-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid rgba(247, 243, 242, 0.14);
+  background: rgba(28, 38, 50, 0.62);
+  padding: 14px;
+}
+
+.image-card img {
+  width: 100%;
+  aspect-ratio: 1 / 0.72;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.image-card .delete-button {
+  background: transparent;
+  border: 1px solid rgba(254, 177, 97, 0.72);
+  color: var(--sol);
+}
+
+.empty-state {
+  border: 1px dashed rgba(247, 243, 242, 0.24);
+  color: rgba(247, 243, 242, 0.68);
+  padding: 24px;
+}
+
+@media (max-width: 980px) {
+  .upload-panel,
+  .upload-form {
+    grid-template-columns: 1fr;
+  }
+
+  .file-field,
+  .upload-form button {
+    grid-column: auto;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .login-shell,
+  .admin-main {
+    padding: 24px 18px 64px;
+  }
+
+  .login-panel,
+  .upload-panel,
+  .image-section {
+    padding: 22px;
+  }
+
+  .admin-header {
+    align-items: flex-start;
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .admin-header nav {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .image-grid {
+    grid-template-columns: 1fr;
+  }
+}

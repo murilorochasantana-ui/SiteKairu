@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kairu Admin — Imagens</title>
+    <link rel="stylesheet" href="/css/00-global.css" />
+    <link rel="stylesheet" href="/admin/admin.css" />
+  </head>
+  <body class="admin-body">
+    <header class="admin-header">
+      <a href="/" aria-label="Voltar para o site">
+        <img src="/assets/logo.svg" alt="Kairu Arquitetura" />
+      </a>
+      <nav>
+        <a href="/" target="_blank" rel="noreferrer">Ver site</a>
+        <button id="logoutButton" type="button">Sair</button>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-intro">
+        <p class="admin-eyebrow">Painel administrativo</p>
+        <h1>Imagens da landing page</h1>
+        <p>
+          Organize o carrossel inicial e o portfólio. As alterações aparecem no
+          site assim que forem salvas.
+        </p>
+      </section>
+
+      <section class="upload-panel" aria-labelledby="uploadTitle">
+        <div>
+          <p class="admin-eyebrow">Nova imagem</p>
+          <h2 id="uploadTitle">Subir arquivo</h2>
+        </div>
+
+        <form id="uploadForm" class="upload-form">
+          <label>
+            Onde aparece
+            <select name="section" required>
+              <option value="hero_background">Fundo principal da hero</option>
+              <option value="hero">Carrossel da hero</option>
+              <option value="portfolio">Portfólio</option>
+            </select>
+          </label>
+          <label>
+            Texto alternativo
+            <input
+              name="alt"
+              type="text"
+              placeholder="Ex.: Fachada residencial ao entardecer"
+            />
+          </label>
+          <label>
+            Ordem
+            <input name="sort_order" type="number" min="1" placeholder="Automática" />
+          </label>
+          <label class="file-field">
+            Imagem
+            <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
+          </label>
+          <button type="submit">Enviar imagem</button>
+        </form>
+        <p id="uploadMessage" class="form-message" role="status"></p>
+      </section>
+
+      <section class="image-section" aria-labelledby="heroBackgroundTitle">
+        <div class="section-heading">
+          <p class="admin-eyebrow">Hero</p>
+          <h2 id="heroBackgroundTitle">Fundo principal</h2>
+        </div>
+        <div id="heroBackgroundList" class="image-grid image-grid-featured"></div>
+      </section>
+
+      <section class="image-section" aria-labelledby="heroTitle">
+        <div class="section-heading">
+          <p class="admin-eyebrow">Hero</p>
+          <h2 id="heroTitle">Carrossel inicial</h2>
+        </div>
+        <div id="heroList" class="image-grid"></div>
+      </section>
+
+      <section class="image-section" aria-labelledby="portfolioTitle">
+        <div class="section-heading">
+          <p class="admin-eyebrow">Portfólio</p>
+          <h2 id="portfolioTitle">Galeria de projetos</h2>
+        </div>
+        <div id="portfolioList" class="image-grid"></div>
+      </section>
+    </main>
+
+    <script src="/admin/admin.js"></script>
+  </body>
+</html>
